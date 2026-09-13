@@ -1,0 +1,159 @@
+{
+ "_comment": "Enemies & Creatures tab. id = doodad base GUID (Content/db/doodads/doodads.cdb, Shared.EntityIds), key = doodad name, type = Hostile | Neutral, spac = animation set used only when the doodad has no sprite of its own. Bosses (Guardian of Minerva, Pyzifax, The Eye, Great Phoenix of Arabia, Talos Prototype, Di Inferi) and their parts are left out on purpose.",
+ "categories": [
+  {
+   "name": "Enemies",
+   "type": "Hostile",
+   "children": [
+    {
+     "name": "Fallen & Potmen",
+     "entities": [
+      {"name": "Potman", "id": "ae7a0ffd-8d55-41f4-8339-9468863f26af", "key": "potman", "aliases": "potmen", "spac": "potman_new_animations"},
+      {"name": "Fallen", "id": "4834fae8-d4b2-400b-a5ac-bdf5d027bf19", "key": "fallen", "aliases": "walker", "spac": "fallen"},
+      {"name": "Fallen Crawler", "id": "547bf74f-8612-437c-800f-2051df20596f", "key": "fallen_crawler", "spac": "fallen_crawler_animations"},
+      {"name": "Fallen Sword", "id": "62de0892-ddf0-4fd3-9ddd-1f9a164282c8", "key": "fallen_sword", "spac": "fallen_sword_animations"},
+      {"name": "Fallen Spear", "id": "c2cb8055-7b58-43d7-b7c8-19d7f315d1bb", "key": "fallen_spear", "spac": "fallen_spear_animations"},
+      {"name": "Fallen Bloat", "id": "13bd9feb-5867-43be-bd06-7208d30c1191", "key": "fallen_bloat", "spac": "fallen_explosive"},
+      {"name": "Fallen Centurion", "id": "c7638a46-2385-4e72-b7d4-db6b4295183d", "key": "fallen_centurion", "spac": "fallen_elite"}
+     ]
+    },
+    {
+     "name": "Plains",
+     "entities": [
+      {"name": "Rat", "id": "461e875b-7336-4fa5-9d6c-5c6d7d4d9be7", "key": "rat", "spac": "rat_animations"},
+      {"name": "Rat Big", "id": "e3264c76-9720-467a-a664-69372afe5612", "key": "rat_big", "spac": "rat_animations"},
+      {"name": "Rat Giant", "id": "3a362f95-39ae-49df-baf4-14d7ffd14131", "key": "rat_giant", "spac": "rat_animations"},
+      {"name": "Goat Male", "id": "f6560a75-f2b3-4cfd-a19f-667796d47989", "key": "goat_male", "type": "Neutral", "aliases": "goat", "spac": "goat_body_animations"},
+      {"name": "Goat Female", "id": "2bed71f4-c937-42a2-b10a-40aad213d4c6", "key": "goat_female", "type": "Neutral", "aliases": "goat", "spac": "goat_body_animations"},
+      {"name": "Bush Crab", "id": "4a99976f-d12b-4859-878f-06f8cde0c12c", "key": "bush_crab", "spac": "bushcrab_new_animations"},
+      {"name": "Boar", "id": "66f27d31-9c36-456d-83ed-799cc4052fa5", "key": "boar", "spac": "boar_body_animations"},
+      {"name": "Wolf", "id": "2980b3d2-5cd8-4cdc-b629-8620fcb6fc56", "key": "wolf", "spac": "wolf_new_animations"},
+      {"name": "Wolf Alpha", "id": "e4923315-eafc-454c-b61f-248d109f94ed", "key": "wolf_alpha", "spac": "wolf_new_animations"}
+     ]
+    },
+    {
+     "name": "Forest",
+     "entities": [
+      {"name": "Bear", "id": "5c13e960-82bd-4bf0-b227-d728a80ad82e", "key": "bear", "spac": "bear_new_animations"},
+      {"name": "Grey Satyr Tiny", "id": "d82885c6-9abf-488f-b7d4-0cb10dbc7e81", "key": "grey_satyr_tiny", "spac": "satyr_tiny_body_animations"},
+      {"name": "Grey Satyr Ranger", "id": "bac32d2a-c59a-4458-8c50-580865e1f205", "key": "grey_satyr_ranger", "spac": "satyr_ranger_animations"},
+      {"name": "Grey Satyr Barbarian", "id": "e02eb81f-291a-4bae-b4cb-c63eeaba054d", "key": "grey_satyr_barbarian", "spac": "satyr_bandit_animations"},
+      {"name": "Grey Satyr Brute", "id": "1ef43ea5-310d-4388-b150-19358f08d5dc", "key": "grey_satyr_brute", "spac": "satyr_brute"}
+     ]
+    },
+    {
+     "name": "Desert",
+     "entities": [
+      {"name": "Jumping Skull", "id": "7aa34b5b-6133-4064-b865-3c6d8c7bc0d0", "key": "jumping_skull", "spac": "skull_animations"},
+      {"name": "Explosive Jumping Skull", "id": "598d27f4-25e0-4edb-85f0-f33dc80006e1", "key": "explosive_jumping_skull", "spac": "skull_animations"},
+      {"name": "Snake", "id": "e829325b-03e3-4e3a-87cc-dc46cb5720a4", "key": "snake", "spac": "snake_animations"},
+      {"name": "Small Scorpion", "id": "b89bf239-ab73-4e64-b1a3-0abe6150ca18", "key": "small_scorpion", "spac": "small_scorpion_animations"},
+      {"name": "Big Scorpion", "id": "93278380-63ba-4318-86dc-d3608315109a", "key": "big_scorpion", "aliases": "large scorpion", "spac": "big_scorpion_animations"},
+      {"name": "Rock Crab", "id": "c70fdbb7-d0d6-45a4-96a6-f9be7b4e89c1", "key": "rock_crab", "spac": "rockcrab_animations"},
+      {"name": "Skeleton Warrior", "id": "1b4b5ff1-f865-4db0-9b5e-0062be065728", "key": "skeleton_warrior", "aliases": "skeleton"},
+      {"name": "Skeleton Archer", "id": "e41496dd-dd36-44bb-8f1e-a50c2e3391e3", "key": "skeleton_archer"},
+      {"name": "Vulture", "id": "72ab7ed8-b9d2-40e3-81d3-ccb54cc1ea50", "key": "vulture", "spac": "vulture_animations"},
+      {"name": "Gorgon", "id": "0ea50660-a18d-4497-8515-8ab1cb646aa3", "key": "gorgon"},
+      {"name": "Medusa", "id": "5e1f1aaa-2e8c-403d-8398-3d56f45eb3b3", "key": "medusa", "spac": "medusa_new_animations"},
+      {"name": "Satyr Tiny", "id": "8907f5b2-5cde-4e96-9fdd-deaa28be86d2", "key": "satyr_tiny", "spac": "satyr_tiny_body_animations"},
+      {"name": "Satyr Ranger", "id": "1602378e-45b3-4408-b044-947e48cb8763", "key": "satyr_ranger", "spac": "satyr_ranger_animations"},
+      {"name": "Satyr Barbarian", "id": "6af0aeac-e9f8-41ce-9ca7-eb43085ce16a", "key": "satyr_barbarian", "spac": "satyr_bandit_animations"},
+      {"name": "Satyr Brute", "id": "7c020933-9f5b-4aac-b1f6-323d5897da2e", "key": "satyr_brute", "spac": "satyr_brute"},
+      {"name": "Pyzifax Scout", "id": "69c6e6b3-df1f-4ae7-a8e4-06c8a948fcbd", "key": "satyr_tiny (pyzifax_scout)", "aliases": "satyr tiny scout", "spac": "satyr_tiny_body_animations"}
+     ]
+    },
+    {
+     "name": "Magi",
+     "entities": [
+      {"name": "Magus Mercury", "id": "27dbe950-db7c-47f2-bad2-b58156e641b7", "key": "magus_mercury", "aliases": "magus grey robes", "spac": "magus_animations"},
+      {"name": "Magus Minerva", "id": "ffa7a408-1723-41e0-844e-13c6487f5228", "key": "magus_minerva", "spac": "magus_animations"},
+      {"name": "Magus Diana", "id": "94e95e4c-e8eb-4688-9aa5-d81b5be3a97a", "key": "magus_diana", "spac": "magus_animations"},
+      {"name": "Magus Mars", "id": "7b7a694a-e79e-4524-8c0d-2562ee84e54d", "key": "magus_mars", "spac": "magus_animations"},
+      {"name": "Magus Venus", "id": "bdb42590-8ee8-4b52-8adb-bdf45c54adc0", "key": "magus_venus", "spac": "magus_animations"},
+      {"name": "Magus Orcus", "id": "d2358e9c-febf-4e65-a6ba-ee00b85959f7", "key": "magus_orcus", "spac": "magus_animations"},
+      {"name": "Magus Vulcan", "id": "80d0c333-43fc-42b9-b7dc-1f57c8408471", "key": "magus_vulcan", "aliases": "magus red robes", "spac": "magus_animations"},
+      {"name": "Magus Ceres", "id": "1c4f68d1-9891-4846-aff5-14818267626d", "key": "magus_ceres", "aliases": "magus (black) black robes", "spac": "magus_animations"}
+     ]
+    },
+    {
+     "name": "Volcanic",
+     "entities": [
+      {"name": "Ashman", "id": "5c8cbb6a-235b-4c0b-930d-425d8b4612cb", "key": "ashman", "spac": "potman_new_animations"},
+      {"name": "Engineer", "id": "f0d488df-f26a-4cb5-b3bb-ed09e72e5207", "key": "engineer", "spac": "engineer_animations"},
+      {"name": "Master Engineer", "id": "f6c01f12-f7c1-4811-a013-181a1ec7ad22", "key": "master_engineer", "spac": "engineer_animations"},
+      {"name": "Lava Snake", "id": "a3f0dd66-fd7b-4f2d-b108-d97779a7e102", "key": "lava_snake", "spac": "snake_animations"},
+      {"name": "Lava Spitter", "id": "09a3f796-073d-47b2-866c-8c300031212e", "key": "lava_spitter", "aliases": "lava lake monster", "spac": "lava_spitter_animations"},
+      {"name": "Burning Walker", "id": "1a2505dc-c825-4a01-8c04-fc18b84bd000", "key": "burning_walker", "aliases": "burning fallen", "spac": "fallen"},
+      {"name": "Burning Crawler", "id": "30be62c9-ebc5-4e6b-a4b3-10e85e91269b", "key": "burning_crawler", "spac": "fallen_crawler_animations"},
+      {"name": "Burning Bloat", "id": "d3ce9751-d6b2-4850-87d2-f86d95600628", "key": "burning_bloat", "spac": "fallen_explosive"},
+      {"name": "Burning Centurion", "id": "5cf6acea-d5d1-4dfd-b7fe-6acaf15eea70", "key": "burning_centurion", "spac": "fallen_elite"},
+      {"name": "Phoenix", "id": "4681b69c-5742-4733-88ba-79b0dd3a4dc8", "key": "phoenix", "spac": "new_phoenix_animations"},
+      {"name": "Phoenix Egg", "id": "1b93cc70-d603-4f79-9c01-341eecf989a2", "key": "phoenix_egg"},
+      {"name": "Bone Crab", "id": "8b227420-5049-4a93-830b-72728b8f68d4", "key": "bone_crab", "spac": "bushcrab_new_animations"},
+      {"name": "Ashen Jumping Skull", "id": "297cfe90-d389-4d7a-a746-60498c809f1a", "key": "ashen_jumping_skull", "spac": "skull_animations"},
+      {"name": "Ashen Skeleton Jumping Skull", "id": "e4b2ed2d-24a5-4da7-b53b-0574aa187b79", "key": "ashen_skeleton_jumping_skull", "spac": "skull_animations"},
+      {"name": "Ashen Skeleton Warrior", "id": "1ce5e74e-6e03-4a46-b0af-e88b44d343d2", "key": "ashen_skeleton_warrior"},
+      {"name": "Ashen Skeleton Archer", "id": "6e58171a-ac89-4c38-a818-d03335a087ea", "key": "ashen_skeleton_archer"},
+      {"name": "Fire Elemental", "id": "e51b9804-7dd4-4459-ae25-dc332141ebe8", "key": "fire_elemental", "spac": "fire_elemental_animations"},
+      {"name": "Lava Construct", "id": "fcb2fedf-6731-4056-9a1a-8e32c78884ec", "key": "lava_construct", "spac": "lava_construct_upper_animations"}
+     ]
+    },
+    {
+     "name": "Other",
+     "entities": [
+      {"name": "Wraith", "id": "6b502dbd-7109-4dcb-9ebb-53283f7d1abb", "key": "wraith", "spac": "wraith_new_animations"},
+      {"name": "Bilian", "id": "a9cca979-2733-4e6d-989e-de5590b19530", "key": "bilian"},
+      {"name": "Swamp Plant", "id": "1e8b0b05-1bdf-4a99-a9b5-230d98f7cbe8", "key": "swamp_placeholder", "aliases": "swamp placeholder"},
+      {"name": "Maximus Memeus", "id": "53afba98-d131-4bf3-b7f3-a581608b6450", "key": "maximus_memeus", "note": "Developer easter egg with a huge amount of health.", "note_ru": "Пасхалка разработчиков, у него очень много здоровья."}
+     ]
+    },
+    {
+     "name": "Statues & Turrets",
+     "entities": [
+      {"name": "Satyr Watchtower", "id": "3b44a185-b688-499d-95d9-3ea0ff2d908d", "key": "satyr_watchtower"},
+      {"name": "Fire Statue", "id": "42b2b524-b0bf-4f76-901a-6b168fe364bd", "key": "fire_statue", "spac": "fire_statue_animations"},
+      {"name": "Laser Statue", "id": "e6e022c3-ca20-4adf-8039-6cb6f4285484", "key": "laser_statue", "spac": "laser_statue_animations"},
+      {"name": "Static Laser Statue", "id": "ee3b4a90-15a4-4cae-90df-bfe83c5226fa", "key": "static_laser_statue", "spac": "laser_statue_animations"},
+      {"name": "Static Laser Statue (passive)", "id": "e6a46ef7-05a5-407e-b449-ca5a1a596e43", "key": "static_laser_statue (passive)", "spac": "laser_statue_animations"},
+      {"name": "Autoballista (Satyr)", "id": "8f75ff04-224f-418c-be44-3155cead6c25", "key": "autoballista_satyr", "aliases": "auto ballista turret", "spac": "auto_ballista_animations"},
+      {"name": "Autoballista (Engineer)", "id": "3ecf23ff-4f5d-4d10-b2b8-c701bbf6cb0f", "key": "autoballista_engineer", "aliases": "auto ballista turret scorpio", "spac": "auto_ballista_animations"}
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Passive Creatures",
+   "type": "Neutral",
+   "entities": [
+    {"name": "Squirrel", "id": "917b1b83-bbc4-43a9-a52b-2fa4ace0fa13", "key": "squirrel", "spac": "squirrel_new_animations"},
+    {"name": "Mouse", "id": "eb34b4d7-5c86-48bc-a28c-6bbc88f1f46b", "key": "mouse", "spac": "mouse_new_animations"},
+    {"name": "Rabbit", "id": "f705bb47-a880-4deb-9853-5cd8daea4697", "key": "rabbit", "spac": "rabbit_new_animations"},
+    {"name": "Frog", "id": "fcd87d55-85f2-4b9c-a609-dd410ac72274", "key": "frog", "spac": "frog_new_animations"},
+    {"name": "Bird", "id": "58c73097-f7c6-4ac5-9c88-288fc68b02d0", "key": "bird", "spac": "bird_animations"},
+    {"name": "Deer Female", "id": "0b45de6a-0037-4cc9-a462-191f0e69f661", "key": "deer_female", "aliases": "deer", "spac": "deer_female_animations"},
+    {"name": "Deer Male", "id": "4d9660a1-666c-4a31-b87b-6de811ea204e", "key": "deer_male", "aliases": "deer", "spac": "deer_male"},
+    {"name": "White Deer Female", "id": "037204d0-0d86-4143-87fc-c6747f16077d", "key": "white_deer_female", "aliases": "deer", "spac": "deer_female_animations"},
+    {"name": "White Deer Male", "id": "06c36d61-6736-49c3-8e97-575721e72bda", "key": "white_deer_male", "aliases": "deer", "spac": "deer_male"},
+    {"name": "Bear Cub", "id": "ffd896c7-2f8b-4db0-81be-61b254b8b3b2", "key": "bear_cub", "spac": "bear_cub_new_animations"},
+    {"name": "Lizard", "id": "cbe26d47-525c-4861-a098-3b4155189bbd", "key": "lizard", "spac": "lizard_animations"},
+    {"name": "Scarab", "id": "275df452-a809-4dd1-94fe-32617e01ea77", "key": "scarab", "spac": "scarab_animations"},
+    {"name": "Turtle", "id": "657c4003-f46a-40cf-ab8b-ec6f31da99ae", "key": "turtle", "spac": "new_turtle_animations"},
+    {"name": "Salamander", "id": "e2341518-6caf-4e51-b7e0-378487b762cd", "key": "lava_lizard", "aliases": "lava lizard", "spac": "lizard_animations"},
+    {"name": "Volcanic Turtle", "id": "71b34d2d-7d86-497f-a613-7975e826eaec", "key": "explosive_turtle", "aliases": "explosive turtle", "spac": "new_turtle_animations"}
+   ]
+  },
+  {
+   "name": "Citizens",
+   "citizens": [
+    {"name": "Citizen (random tier)", "tier": "", "note": "The citizen's quality depends on the area difficulty, like the ones you find in the world.", "note_ru": "Качество жителя зависит от сложности местности, как у найденных в мире."},
+    {"name": "Citizen (Bad)", "tier": "Bad"},
+    {"name": "Citizen (Normal)", "tier": "Normal"},
+    {"name": "Citizen (Good)", "tier": "Good"},
+    {"name": "Legendary Blacksmith", "tier": "LegendaryBlacksmith", "aliases": "citizen legendary"},
+    {"name": "Legendary Leatherworker", "tier": "LegendaryLeatherworker", "aliases": "citizen legendary"},
+    {"name": "Legendary Lumberjack", "tier": "LegendaryLumberjack", "aliases": "citizen legendary"},
+    {"name": "Legendary Merchant", "tier": "LegendaryMerchant", "aliases": "citizen legendary"}
+   ]
+  }
+ ]
+}

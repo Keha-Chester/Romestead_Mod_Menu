@@ -1,0 +1,67 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>RomesteadCheatMenu</AssemblyName>
+    <RootNamespace>RomesteadCheatMenu</RootNamespace>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>embedded</DebugType>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <!-- Romestead's assemblies are built with preview features, so the analyzer demands the same here. -->
+    <EnablePreviewFeatures>true</EnablePreviewFeatures>
+    <NoWarn>$(NoWarn);CA2252;CA1416</NoWarn>
+    <GameDir Condition="'$(GameDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\romestead</GameDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Lib.Harmony" Version="2.4.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Romestead">
+      <HintPath>$(GameDir)\Romestead.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Shared">
+      <HintPath>$(GameDir)\Shared.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="CandideServer">
+      <HintPath>$(GameDir)\CandideServer.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="CandideCreator.Shared">
+      <HintPath>$(GameDir)\CandideCreator.Shared.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="ImGui.NET">
+      <HintPath>$(GameDir)\ImGui.NET.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="MonoGame.Framework">
+      <HintPath>$(GameDir)\MonoGame.Framework.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Data\categories.json" LogicalName="categories.json" />
+    <EmbeddedResource Include="Data\creatures.json" LogicalName="creatures.json" />
+    <Compile Remove="dist\**" />
+  </ItemGroup>
+
+  <!-- Release builds assemble dist\CheatMenu: the mod plus the files from package\ (build-release.ps1 zips it). -->
+  <Target Name="CopyToDist" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <ItemGroup>
+      <DistFile Include="$(OutDir)RomesteadCheatMenu.dll;$(OutDir)0Harmony.dll;$(MSBuildProjectDirectory)\package\*" />
+    </ItemGroup>
+    <MakeDir Directories="$(MSBuildProjectDirectory)\dist\CheatMenu" />
+    <Copy SourceFiles="@(DistFile)" DestinationFolder="$(MSBuildProjectDirectory)\dist\CheatMenu" />
+  </Target>
+
+</Project>

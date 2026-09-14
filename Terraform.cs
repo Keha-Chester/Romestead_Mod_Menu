@@ -465,8 +465,7 @@ internal static class Terraform
         {
             return;
         }
-        Viewport viewport = Globals.GraphicsDevice.Viewport;
-        _viewport = new Vector2(viewport.Width, viewport.Height);
+        UpdateViewport();
 
         MouseState mouse = Mouse.GetState();
         KeyboardState keyboard = Keyboard.GetState();
@@ -675,7 +674,16 @@ internal static class Terraform
         _noteUntil = Environment.TickCount64 + 2500;
     }
 
-    private static Point MouseTile(MouseState mouse)
+    // Screen/world mapping, shared with the buildings tool.
+    internal static void UpdateViewport()
+    {
+        Viewport viewport = Globals.GraphicsDevice.Viewport;
+        _viewport = new Vector2(viewport.Width, viewport.Height);
+    }
+
+    internal static bool HasViewport => _viewport.X > 0f;
+
+    internal static Point MouseTile(MouseState mouse)
     {
         Vector2 world = ScreenToWorld(new Vector2(mouse.X, mouse.Y));
         return new Point((int)MathF.Floor(world.X / TileSize), (int)MathF.Floor(world.Y / TileSize));
@@ -690,7 +698,7 @@ internal static class Terraform
             screen.Y / camera.YScale + camera.CurrentY - _viewport.Y / (2f * camera.YScale));
     }
 
-    private static Vec2 WorldToScreen(float x, float y)
+    internal static Vec2 WorldToScreen(float x, float y)
     {
         var camera = Globals.Game.Camera;
         return new Vec2((x - camera.CurrentX) * camera.XScale + _viewport.X / 2f, (y - camera.CurrentY) * camera.YScale + _viewport.Y / 2f);
@@ -743,6 +751,26 @@ internal static class Terraform
         {
             Log.ErrorOnce("Terraform apply", e);
         }
+    }
+
+    // Server thread: tile changes made by the buildings tool (the demolish square). Not recorded for undo.
+    internal static int ApplyTilesOnServer(List<(int X, int Y, WorldTile Tile)> tiles)
+    {
+        WorldTile[,] current = ServerGameState.WorldTiles;
+        var changes = new List<TileChange>();
+        foreach ((int x, int y, WorldTile tile) in tiles)
+        {
+            WorldTile old = current[x, y];
+            if (old != tile)
+            {
+                changes.Add(new TileChange(x, y, old, tile));
+            }
+        }
+        if (changes.Count > 0)
+        {
+            Apply(changes, forward: true);
+        }
+        return changes.Count;
     }
 
     private static bool IsProtected(S structure)

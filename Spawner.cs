@@ -27,6 +27,7 @@ internal static class Spawner
     private const int MaxItemDropsPerClick = 250;
     private const int MaxEntitiesPerClick = 100;
     private const int MaxCitizensPerClick = 25;
+    public const int MaxFurniturePerClick = 999;
 
     // Creatures and citizens appear 10 tiles (16 px each) in front of the player.
     public const float CreatureDistance = 10 * 16f;
@@ -69,9 +70,42 @@ internal static class Spawner
         Guid worldId = GameState.CurrentWorld.Id;
         error = false;
         amount = Math.Max(1, amount);
-        return entry.Kind == EntryKind.Item
-            ? SpawnItem(entry, amount, origin, forward, worldId)
-            : SpawnResource(entry, amount, origin, forward, worldId, out error);
+        if (entry.Kind == EntryKind.Item)
+        {
+            return SpawnItem(entry, amount, origin, forward, worldId);
+        }
+        if (entry.Kind == EntryKind.Furniture)
+        {
+            return SpawnFurniture(entry, amount, origin, forward, worldId);
+        }
+        return SpawnResource(entry, amount, origin, forward, worldId, out error);
+    }
+
+    // One blueprint on the ground carries the whole amount; picking it up adds that much to the furniture storage.
+    private static string SpawnFurniture(SpawnEntry entry, int amount, Vector3 origin, Vector2 forward, Guid worldId)
+    {
+        amount = Math.Min(amount, MaxFurniturePerClick);
+        string id = entry.Id;
+        int count = amount;
+        ServerQueue.Run(delegate
+        {
+            try
+            {
+                Vector3 start = origin + new Vector3(forward * 4f, 10f);
+                Vector3 velocity = new Vector3(forward * 120f, 0f);
+                if (WorldItemServerManager.SpawnFurnitureWorldItem(id, count, start, velocity, worldId, null) == null)
+                {
+                    Log.Warn($"Furniture spawn failed: {id} x{count}");
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error("Furniture spawn failed: " + id, e);
+            }
+        });
+        return Loc.T(
+            $"Spawned: {entry.NameEn} ×{amount} (a blueprint on the ground: pick it up and place the furniture in furniture mode)",
+            $"Заспавнено: {entry.NameEn} ×{amount} (чертёж на земле: подберите его и расставьте мебель в режиме мебели)");
     }
 
     private static Vector2 GetForward(EntityWrapper player)

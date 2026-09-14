@@ -7,10 +7,14 @@ Press **Ctrl+0** in a loaded world.
 
 ## Features
 
-- **Items**: spawn any item. Categories follow the [Romestead Wiki](https://romestead.wiki.gg/wiki/Items), with game icons, search and amount.
-  Items drop on the ground in front of the character. Hovering an item shows the game's own tooltip.
+- **Items**: spawn any item. Categories follow the [Romestead Wiki](https://romestead.wiki.gg/wiki/Items), with game icons,
+  search (English or Russian names) and amount. Items drop on the ground in front of the character. Hovering an item shows the game's own tooltip.
+- **Furniture**: every piece of furniture, sorted by kind. It drops as a blueprint in front of the character;
+  pick it up and place the furniture in furniture mode.
 - **Enemies & Creatures**: enemies (all except bosses), passive creatures and wild citizens (random or chosen tier).
   They appear 10 tiles in front of the character, up to 100 per click. Citizens can be talked to and invited to your settlement.
+- **Buildings**: with the mouse, finish construction sites at once, upgrade buildings for free or demolish them.
+  Demolition also clears what the world generated, such as ghost town houses and walls or ruins.
 - **Terraform**: a brush for the surface map. Remove mountains and cliffs (they become flat ground), fill water and pits,
   remove forest walls, paint water, swamp, pits, cliffs, hills or any ground (grass, sand, beach, roads…).
   Paint with the mouse, undo with Ctrl+Z, pick a tile with the middle mouse button. Buildings, fields and trees are never touched.
@@ -41,7 +45,7 @@ use Steam → Romestead → **Properties → Installed Files → Verify integrit
 
 ## Good to know
 
-- Spawning, Favour points and terraforming work in your own world (single-player, or when you host).
+- Spawning, buildings, Favour points and terraforming work in your own world (single-player, or when you host).
   Other players see map changes after rejoining or when that area loads again.
 - The pause only works in single-player.
 - Terraform edits are saved into the world, so back up your save before big changes.
@@ -102,10 +106,13 @@ This is an unofficial fan-made mod, not affiliated with the developers of Romest
 
 ### Возможности
 
-- **Items** — спавн любых предметов: категории как на [вики](https://romestead.wiki.gg/wiki/Items), иконки из игры, поиск и количество.
-  Предметы падают на землю перед персонажем. При наведении показывается родная подсказка игры.
+- **Items** — спавн любых предметов: категории как на [вики](https://romestead.wiki.gg/wiki/Items), иконки из игры,
+  поиск по-английски или по-русски и количество. Предметы падают на землю перед персонажем. При наведении показывается родная подсказка игры.
+- **Мебель** — вся мебель игры по видам. Появляется чертежом перед персонажем: подберите его и расставьте мебель в режиме мебели.
 - **Enemies & Creatures** — противники (все, кроме боссов), мирные существа и дикие жители (случайный или выбранный тир).
   Появляются в 10 тайлах перед персонажем, до 100 за клик. С жителями можно поговорить и позвать их в поселение.
+- **Постройки** — мышью: мгновенно достроить стройплощадки, бесплатно улучшить здания или снести их.
+  Снос расчищает и то, что сгенерировал мир: дома и стены городов-призраков, руины.
 - **Terraform** — кисть для карты поверхности: убрать горы и скалы (станут ровной землёй), засыпать воду и ямы,
   убрать лесные стены, нарисовать воду, болото, яму, скалы, холмы или любое покрытие земли (трава, песок, пляж, дороги…).
   Рисование мышью, отмена Ctrl+Z, пипетка на средней кнопке мыши. Постройки, поля и деревья кисть не трогает.
@@ -136,7 +143,7 @@ This is an unofficial fan-made mod, not affiliated with the developers of Romest
 
 ### Полезно знать
 
-- Спавн, очки преимуществ и террафоминг работают в своём мире (одиночная игра или когда вы хост).
+- Спавн, постройки, очки преимуществ и террафоминг работают в своём мире (одиночная игра или когда вы хост).
   Другие игроки увидят изменения карты после перезахода или когда этот участок загрузится заново.
 - Пауза работает только в одиночной игре.
 - Террафоминг сохраняется в мир, поэтому перед большими изменениями сделайте копию сохранения.

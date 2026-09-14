@@ -31,6 +31,7 @@ internal static class CheatMenu
 
     private static readonly SpawnerView ItemsView = new SpawnerView { Id = "items", Presets = new[] { 1, 10, 50, 100, 999 }, MaxAmount = 99999 };
     private static readonly SpawnerView CreaturesView = new SpawnerView { Id = "creatures", Presets = new[] { 1, 3, 5, 10, 25, 50 }, MaxAmount = 100 };
+    private static readonly SpawnerView FurnitureView = new SpawnerView { Id = "furniture", Presets = new[] { 1, 5, 10, 50 }, MaxAmount = Spawner.MaxFurniturePerClick };
 
     private static long _lastDrawTicks;
     private static bool _savedDisableMouseDrawing;
@@ -60,6 +61,7 @@ internal static class CheatMenu
         Globals.DisableMouseDrawing = true;
         ItemsView.Amount = Math.Clamp(Settings.Data.Amount, 1, ItemsView.MaxAmount);
         CreaturesView.Amount = Math.Clamp(Settings.Data.CreatureAmount, 1, CreaturesView.MaxAmount);
+        FurnitureView.Amount = Math.Clamp(Settings.Data.FurnitureAmount, 1, FurnitureView.MaxAmount);
         _creaturesPersistent = Settings.Data.CreaturesPersistent;
         GamePause.Begin();
         // The Esc that left the terraforming brush must not close the menu right away.
@@ -79,6 +81,7 @@ internal static class CheatMenu
         InputBlocker.OnMenuClosed();
         Settings.Data.Amount = ItemsView.Amount;
         Settings.Data.CreatureAmount = CreaturesView.Amount;
+        Settings.Data.FurnitureAmount = FurnitureView.Amount;
         Settings.Data.CreaturesPersistent = _creaturesPersistent;
         Settings.Save();
     }
@@ -173,11 +176,33 @@ internal static class CheatMenu
                         ImGui.EndTabItem();
                     }
                 }
+                if (ImGui.BeginTabItem(Loc.T("Furniture", "Мебель") + "###tab_furniture"))
+                {
+                    try
+                    {
+                        DrawSpawner(Catalog.FurnitureTab, Catalog.FurnitureError, FurnitureView, s);
+                    }
+                    finally
+                    {
+                        ImGui.EndTabItem();
+                    }
+                }
                 if (ImGui.BeginTabItem(Loc.T("Enemies & Creatures", "Враги и существа") + "###tab_creatures"))
                 {
                     try
                     {
                         DrawSpawner(Catalog.CreaturesTab, Catalog.CreaturesError, CreaturesView, s);
+                    }
+                    finally
+                    {
+                        ImGui.EndTabItem();
+                    }
+                }
+                if (ImGui.BeginTabItem(Loc.T("Buildings", "Постройки") + "###tab_buildings"))
+                {
+                    try
+                    {
+                        DrawBuildings(s);
                     }
                     finally
                     {
@@ -288,7 +313,7 @@ internal static class CheatMenu
             ImGui.SetKeyboardFocusHere();
             _focusSearch = false;
         }
-        ImGui.InputTextWithHint("##search_" + view.Id, Loc.T("Search by English name...", "Поиск по английскому названию..."), ref view.Search, 96);
+        ImGui.InputTextWithHint("##search_" + view.Id, Loc.T("Search in English or Russian...", "Поиск по-английски или по-русски..."), ref view.Search, 96);
         ImGui.SameLine();
         if (ImGui.Button(Loc.T("Clear", "Очистить") + "###clear_" + view.Id))
         {
@@ -362,6 +387,12 @@ internal static class CheatMenu
                 Ui.Disabled(Loc.T(
                     $"Click: spawn ×{view.Amount} {tiles} tiles in front of the character. Bosses are not in the list.",
                     $"Клик: заспавнить ×{view.Amount} в {tiles} тайлах перед персонажем. Боссов в списке нет."));
+            }
+            else if (view == FurnitureView)
+            {
+                Ui.Disabled(Loc.T(
+                    $"Click: drop a furniture blueprint ×{view.Amount} in front of the character. Pick it up, and the furniture can be placed in furniture mode.",
+                    $"Клик: бросить чертёж мебели ×{view.Amount} перед персонажем. Подберите его, и мебель можно будет расставить в режиме мебели."));
             }
             else if (!searching && view.Selected != null && view.Selected.Name == "Resources")
             {
@@ -521,8 +552,8 @@ internal static class CheatMenu
 
     private static void DrawTooltip(SpawnEntry entry, float s)
     {
-        // Items and resources get the game's own tooltip; creatures and citizens have none in the game.
-        if (!entry.IsEntity && GameTooltip.TryDraw(entry))
+        // Items and resources get the game's own tooltip; creatures, citizens and furniture have none worth showing.
+        if ((entry.Kind == EntryKind.Item || entry.Kind == EntryKind.Resource) && GameTooltip.TryDraw(entry))
         {
             return;
         }
@@ -540,8 +571,22 @@ internal static class CheatMenu
         {
             Ui.Text(entry.NameLocal);
         }
+        if (Loc.IsRussian && !string.IsNullOrEmpty(entry.NameRu) && entry.NameRu != entry.NameEn && entry.NameRu != entry.NameLocal)
+        {
+            Ui.Text(entry.NameRu);
+        }
         switch (entry.Kind)
         {
+            case EntryKind.Furniture:
+                Ui.Text(Loc.T("Furniture blueprint: pick it up, then place it in furniture mode",
+                    "Чертёж мебели: подберите, затем расставьте в режиме мебели"));
+                if (entry.RecipeBuilding != null)
+                {
+                    string workshop = Catalog.BuildingTypeName(entry.RecipeBuilding);
+                    Ui.Disabled(Loc.T($"Normally made in: {workshop}, level {entry.RecipeLevel}", $"Обычно делается в: {workshop}, уровень {entry.RecipeLevel}"));
+                }
+                Ui.Disabled(entry.Id);
+                break;
             case EntryKind.Creature:
                 Ui.Text(entry.EntityType == EntityType.Hostile ? Loc.T("Enemy", "Враг") : Loc.T("Passive creature", "Мирное существо"));
                 if (!string.IsNullOrEmpty(entry.Aliases))
@@ -642,6 +687,87 @@ internal static class CheatMenu
             trimmed = trimmed.Substring(0, trimmed.Length - 1);
         }
         return trimmed.TrimEnd() + dots;
+    }
+
+    // ------------------------------------------------------------------ buildings tab
+
+    private static void DrawBuildings(float s)
+    {
+        ImGui.BeginChild("##buildings", new Vec2(0f, -FooterHeight(s)), false);
+        try
+        {
+            bool can = BuildTool.CanUse(out string reason);
+            Ui.Wrapped(Loc.T(
+                "Pick an action and press \"Use with mouse\": the menu closes, and a left click on the map applies the action to what is under the cursor. "
+                + "RMB, Esc or Ctrl+0 bring the menu back. You can keep walking meanwhile.",
+                "Выберите действие и нажмите «Управлять мышью»: меню закроется, а щелчок левой кнопкой по карте применит действие к тому, что под курсором. "
+                + "ПКМ, Esc или Ctrl+0 возвращают в меню. Ходить персонажем при этом можно."), Ui.Muted);
+            if (!can)
+            {
+                Ui.Colored(Ui.Bad, reason);
+            }
+            ImGui.Spacing();
+
+            float width = 420f * s;
+            BuildAction current = BuildTool.CurrentAction;
+            foreach (BuildAction action in BuildTool.Actions)
+            {
+                if (ImGui.RadioButton(BuildTool.ActionLabel(action) + "###build_action_" + action, current == action))
+                {
+                    BuildTool.Select(action);
+                    current = action;
+                }
+                ImGui.Indent(30f * s);
+                Ui.Wrapped(BuildTool.ActionHint(action), Ui.Muted);
+                ImGui.Unindent(30f * s);
+                ImGui.Spacing();
+            }
+            if (current == BuildAction.Demolish)
+            {
+                int radius = Settings.Data.DemolishRadius;
+                string size = (radius * 2 + 1).ToString(CultureInfo.InvariantCulture);
+                ImGui.SetNextItemWidth(width);
+                if (ImGui.SliderInt(Loc.T("Clearing square", "Квадрат расчистки") + "###demolish_radius", ref radius, 0, BuildTool.MaxRadius, size + " x " + size))
+                {
+                    Settings.Data.DemolishRadius = radius;
+                    Settings.MarkDirty();
+                }
+            }
+            ImGui.Spacing();
+            if (!can)
+            {
+                ImGui.BeginDisabled();
+            }
+            try
+            {
+                if (ImGui.Button(Loc.T("Use with mouse", "Управлять мышью") + "###build_start", new Vec2(width, 0f)))
+                {
+                    string failure = BuildTool.Start();
+                    if (failure != null)
+                    {
+                        SetStatus(failure, true);
+                    }
+                }
+            }
+            finally
+            {
+                if (!can)
+                {
+                    ImGui.EndDisabled();
+                }
+            }
+            ImGui.Spacing();
+            ImGui.Separator();
+            Ui.Wrapped(Loc.T(
+                "Building and upgrading cost no materials. Demolition can't be undone: citizens move to other homes or become wild, "
+                + "storages drop their contents on the ground and the construction materials come back, as with the game's own demolition.",
+                "Строительство и улучшение не тратят материалы. Снос не отменяется: жители переезжают в другие дома или становятся дикими, "
+                + "склады выбрасывают содержимое на землю, а стройматериалы возвращаются, как при обычном сносе в игре."), Ui.Muted);
+        }
+        finally
+        {
+            ImGui.EndChild();
+        }
     }
 
     // ------------------------------------------------------------------ terraform tab
@@ -1101,8 +1227,8 @@ internal static class CheatMenu
         if (GameAccess.InWorld && !GameAccess.IsHost)
         {
             Ui.Colored(Ui.Bad, Loc.T(
-                "You are not the host of this world: spawning, favour points and terraforming only work in your own world.",
-                "Вы не хост этого мира: спавн, очки преимуществ и террафоминг работают только в вашем мире."));
+                "You are not the host of this world: spawning, buildings, favour points and terraforming only work in your own world.",
+                "Вы не хост этого мира: спавн, постройки, очки преимуществ и террафоминг работают только в вашем мире."));
         }
         else if (_status.Length > 0 && ImGui.GetTime() - _statusTime < 6.0)
         {

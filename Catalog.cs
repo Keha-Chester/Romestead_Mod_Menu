@@ -12,6 +12,7 @@ using CandideCreator.Shared.Models.SpritesAnimationCollections;
 using Microsoft.Xna.Framework.Graphics;
 using Shared;
 using Shared.Data;
+using Shared.Data.Furniture;
 using Shared.Entity;
 using Shared.Entity.Components;
 using Shared.Models.Construction;
@@ -27,6 +28,7 @@ internal enum EntryKind
 {
     Item,
     Resource,
+    Furniture,
     Creature,
     Citizen
 }
@@ -47,6 +49,8 @@ internal sealed class SpawnEntry
     public EntryKind Kind;
     public string NameEn;
     public string NameLocal;
+    // Read from the Russian locale whatever language the game runs in, so Russian search always works.
+    public string NameRu;
     public string Description;
     public string SearchText;
     public string IconId;
@@ -66,6 +70,11 @@ internal sealed class SpawnEntry
     public int MaxHealth;
     public string NoteEn;
     public string NoteRu;
+
+    // Furniture: EntityId is the doodad it is drawn with, Frame the piece of its sprite sheet.
+    public int Frame = -1;
+    public string RecipeBuilding;
+    public int RecipeLevel;
 
     public bool IsEntity => Kind == EntryKind.Creature || Kind == EntryKind.Citizen;
 }
@@ -129,8 +138,15 @@ internal static class Catalog
 
     public static CatalogTab CreaturesTab { get; private set; }
 
+    public static CatalogTab FurnitureTab { get; private set; }
+
     private static string _itemsFailure;
     private static string _creaturesFailure;
+    private static string _furnitureFailure;
+
+    public static string FurnitureError => _furnitureFailure == null
+        ? null
+        : Loc.T("Could not build the furniture list: ", "Не удалось построить список мебели: ") + _furnitureFailure;
 
     public static string BuildError => _itemsFailure == null
         ? null
@@ -164,6 +180,15 @@ internal static class Catalog
         {
             _creaturesFailure = e.Message;
             Log.Error("Creature catalog build failed", e);
+        }
+        try
+        {
+            BuildFurniture();
+        }
+        catch (Exception e)
+        {
+            _furnitureFailure = e.Message;
+            Log.Error("Furniture catalog build failed", e);
         }
     }
 
@@ -274,15 +299,16 @@ internal static class Catalog
             Key = key,
             Id = id,
             Kind = EntryKind.Item,
-            NameEn = EnglishLocale.Get(id + ItemDataBase.SuffixName) ?? local ?? id,
+            NameEn = LocaleFile.English.Get(id + ItemDataBase.SuffixName) ?? local ?? id,
             NameLocal = local,
+            NameRu = LocaleFile.Russian.Get(id + ItemDataBase.SuffixName),
             Description = data.Description.HasValue ? Translate(data.Description.Value) : null,
             IconId = data.Icon,
             MaxStack = Math.Max(1, data.MaxStackSize),
             Unique = data.Unique,
             CategoryLabel = categoryLabel
         };
-        entry.SearchText = (entry.NameEn + "\n" + entry.NameLocal + "\n" + id).ToLowerInvariant();
+        entry.SearchText = BuildSearchText(entry.NameEn, entry.NameLocal, entry.NameRu, id);
         EntriesByKey[key] = entry;
         return entry;
     }
@@ -305,13 +331,14 @@ internal static class Catalog
             Key = key,
             Id = id,
             Kind = EntryKind.Resource,
-            NameEn = EnglishLocale.Get(id + ConstructionResourcesDataBase.SuffixName) ?? local ?? id,
+            NameEn = LocaleFile.English.Get(id + ConstructionResourcesDataBase.SuffixName) ?? local ?? id,
             NameLocal = local,
+            NameRu = LocaleFile.Russian.Get(id + ConstructionResourcesDataBase.SuffixName),
             Description = Translate(data.Value.Description),
             IconId = data.Value.Icon,
             CategoryLabel = categoryLabel
         };
-        entry.SearchText = (entry.NameEn + "\n" + entry.NameLocal + "\n" + id).ToLowerInvariant();
+        entry.SearchText = BuildSearchText(entry.NameEn, entry.NameLocal, entry.NameRu, id);
         EntriesByKey[key] = entry;
         return entry;
     }
@@ -414,6 +441,8 @@ internal static class Catalog
             Id = internalName,
             Kind = EntryKind.Creature,
             NameEn = name,
+            // Creature names that the game shows (bosses, bestiary) use the English name itself as the key.
+            NameRu = LocaleFile.Russian.Get(name) ?? LocaleFile.Russian.Get(data.Name),
             NoteEn = GetString(json, "note"),
             NoteRu = GetString(json, "note_ru"),
             Aliases = GetString(json, "aliases"),
@@ -433,7 +462,7 @@ internal static class Catalog
         {
             // Health is only shown in the tooltip.
         }
-        entry.SearchText = string.Join("\n", name, entry.Aliases, internalName, type == EntityType.Hostile ? "enemy враг" : "creature animal животное").ToLowerInvariant();
+        entry.SearchText = BuildSearchText(name, entry.NameRu, entry.Aliases, internalName, type == EntityType.Hostile ? "enemy враг" : "creature animal животное");
         EntriesByKey[key] = entry;
         return entry;
     }
@@ -494,7 +523,108 @@ internal static class Catalog
         tab.Entries = entries.OrderBy(e => e.NameEn, StringComparer.OrdinalIgnoreCase).ToList();
     }
 
+    // ------------------------------------------------------------------ furniture
+
+    // Tags that only say which biome style a piece has; the first other tag is its kind.
+    private static readonly HashSet<string> FurnitureStyleTags = new HashSet<string> { "plains", "forest", "desert", "volcano", "misc" };
+
+    private static readonly (string Tag, string Name)[] FurnitureKinds =
+    {
+        ("table", "Tables"), ("chair", "Chairs"), ("sofa", "Sofas"), ("bed", "Beds"), ("cupboard", "Cupboards"),
+        ("shelf", "Shelves"), ("box", "Boxes"), ("stove", "Stoves"), ("lamp", "Lamps"), ("pot", "Pots"),
+        ("plant", "Plants"), ("fence", "Fences")
+    };
+
+    private static void BuildFurniture()
+    {
+        var tab = new CatalogTab { Name = "Furniture" };
+        var byTag = new Dictionary<string, Category>(StringComparer.Ordinal);
+        foreach ((string tag, string name) in FurnitureKinds)
+        {
+            var category = new Category { Name = name, Label = "Furniture / " + name };
+            byTag[tag] = category;
+            tab.Categories.Add(category);
+        }
+        var other = new Category { Name = "Other", Label = "Furniture / Other" };
+        foreach (FurnitureData data in FurnitureDataBase.DataMap.Values)
+        {
+            string tag = data.Tags?.FirstOrDefault(t => !string.IsNullOrEmpty(t) && !FurnitureStyleTags.Contains(t));
+            Category category = other;
+            if (tag != null && !byTag.TryGetValue(tag, out category))
+            {
+                // A kind added in a newer game version.
+                string name = char.ToUpperInvariant(tag[0]) + tag.Substring(1);
+                category = new Category { Name = name, Label = "Furniture / " + name };
+                byTag[tag] = category;
+                tab.Categories.Add(category);
+            }
+            SpawnEntry entry = GetFurniture(data, category.Label);
+            if (entry != null)
+            {
+                category.Entries.Add(entry);
+            }
+        }
+        tab.Categories.Add(other);
+        tab.Categories.RemoveAll(c => c.Entries.Count == 0);
+        foreach (Category category in tab.Categories)
+        {
+            category.Entries.Sort((a, b) => string.Compare(a.NameEn, b.NameEn, StringComparison.OrdinalIgnoreCase));
+        }
+        FillEntries(tab);
+        FurnitureTab = tab;
+        Log.Info($"Furniture catalog built: {tab.Entries.Count} entries in {tab.Categories.Count} categories");
+    }
+
+    private static SpawnEntry GetFurniture(FurnitureData data, string categoryLabel)
+    {
+        string key = "furniture|" + data.Id;
+        if (EntriesByKey.TryGetValue(key, out SpawnEntry existing))
+        {
+            return existing;
+        }
+        string local = Translate(data.DisplayNameKey);
+        var entry = new SpawnEntry
+        {
+            Key = key,
+            Id = data.Id,
+            Kind = EntryKind.Furniture,
+            NameEn = LocaleFile.English.Get(data.Id + FurnitureDataBase.SuffixName) ?? local ?? data.Id,
+            NameLocal = local,
+            NameRu = LocaleFile.Russian.Get(data.Id + FurnitureDataBase.SuffixName),
+            Description = data.DescriptionKey.HasValue ? Translate(data.DescriptionKey.Value) : null,
+            CategoryLabel = categoryLabel
+        };
+        if (data.Rotations != null && data.Rotations.Length > 0 && data.Rotations[0] != null && data.Rotations[0].Length > 0)
+        {
+            var first = data.Rotations[0][0];
+            entry.EntityId = first.BaseId;
+            if (first.FrameOptions != null && first.FrameOptions.Length > 0 && first.FrameOptions[0] != null && first.FrameOptions[0].Length > 0)
+            {
+                entry.Frame = first.FrameOptions[0][0];
+            }
+        }
+        if (data.Recipe.HasValue)
+        {
+            entry.RecipeBuilding = data.Recipe.Value.BuildingTypeId;
+            entry.RecipeLevel = data.Recipe.Value.LevelRequirement;
+        }
+        entry.SearchText = BuildSearchText(entry.NameEn, entry.NameLocal, entry.NameRu, data.Id);
+        EntriesByKey[key] = entry;
+        return entry;
+    }
+
+    public static string BuildingTypeName(string buildingTypeId)
+    {
+        string key = buildingTypeId + "*building_type:name";
+        return (Loc.IsRussian ? LocaleFile.Russian.Get(key) : null) ?? LocaleFile.English.Get(key) ?? buildingTypeId;
+    }
+
     // ------------------------------------------------------------------ search
+
+    private static string BuildSearchText(params string[] parts)
+    {
+        return string.Join("\n", parts.Where(part => !string.IsNullOrEmpty(part))).ToLowerInvariant();
+    }
 
     public static List<SpawnEntry> Search(CatalogTab tab, string query)
     {
@@ -526,9 +656,12 @@ internal static class Catalog
             entry.IconResolved = true;
             try
             {
-                entry.HasIcon = entry.Kind == EntryKind.Creature
-                    ? ResolveCreatureIcon(entry, out entry.Icon)
-                    : ResolveIcon(entry.IconId, out entry.Icon);
+                entry.HasIcon = entry.Kind switch
+                {
+                    EntryKind.Creature => ResolveCreatureIcon(entry, out entry.Icon),
+                    EntryKind.Furniture => ResolveFurnitureIcon(entry, out entry.Icon),
+                    _ => ResolveIcon(entry.IconId, out entry.Icon)
+                };
             }
             catch (Exception e)
             {
@@ -588,6 +721,24 @@ internal static class Catalog
         }
         Log.Warn($"No sprite found for {entry.NameEn} ({entry.EntityId})");
         return false;
+    }
+
+    // Furniture has no UI icon of its own either: draw the doodad sprite frame it is placed with,
+    // or the blueprint frame the game shows for furniture lying on the ground.
+    private static bool ResolveFurnitureIcon(SpawnEntry entry, out IconRef icon)
+    {
+        icon = default;
+        if (Globals.ImGuiRenderer == null)
+        {
+            return false;
+        }
+        if (entry.EntityId != Guid.Empty
+            && DoodadDatabaseManager.TryGetEntityBaseData(entry.EntityId, out EntityWrapper data)
+            && TryFrameIcon(data.SpriteSheet, entry.Frame >= 0 ? entry.Frame : data.Frame, out icon))
+        {
+            return true;
+        }
+        return ResolveIcon("furniture_frame", out icon);
     }
 
     private static bool TryFrameIcon(SpriteSheet sheet, int frame, out IconRef icon)

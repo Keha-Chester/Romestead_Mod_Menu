@@ -32,6 +32,13 @@ public sealed class SettingsData
 
     public int PickedStructure { get; set; } = -1;
 
+    public int FurnitureAmount { get; set; } = 1;
+
+    // Buildings tab: 0 build construction sites, 1 upgrade, 2 demolish.
+    public int BuildAction { get; set; }
+
+    public int DemolishRadius { get; set; } = 2;
+
     // Keyed by character name.
     public Dictionary<string, CharacterSettings> Characters { get; set; } = new Dictionary<string, CharacterSettings>();
 }

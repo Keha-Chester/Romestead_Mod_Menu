@@ -45,7 +45,7 @@ internal sealed class StatDef
     // Our own label in the menu language, or null to show the game's stat name.
     public string Label => Loc.IsRussian ? LabelRu : LabelEn;
 
-    public string EnglishName => EnglishLocale.Get(Id + "*stats:name") ?? Id;
+    public string EnglishName => LocaleFile.English.Get(Id + "*stats:name") ?? Id;
 
     public string LocalName
     {
@@ -132,7 +132,7 @@ internal static class PlayerCheats
 
     public static string SkillName(CharacterSkill skill)
     {
-        return EnglishLocale.Get(skill.SkillId + SkillsDataBase.SuffixName) ?? skill.Name;
+        return LocaleFile.English.Get(skill.SkillId + SkillsDataBase.SuffixName) ?? skill.Name;
     }
 
     // Uses the game's own level-up routine: it updates the character, grants favour points

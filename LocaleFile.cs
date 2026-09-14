@@ -5,30 +5,39 @@ using System.Text;
 
 namespace RomesteadCheatMenu;
 
-// The game may run in another language, but search works on English names,
-// so read Content/localization/locale_en directly.
+// One of the game's Content/localization files, read directly: the game may run in any language,
+// while the menu shows English names and searches English and Russian ones.
 // Format: int32 pair count, then key/value strings with 7-bit length prefixes.
-internal static class EnglishLocale
+internal sealed class LocaleFile
 {
-    private static Dictionary<string, string> _map;
+    public static readonly LocaleFile English = new LocaleFile("locale_en");
+    public static readonly LocaleFile Russian = new LocaleFile("locale_ru_RU");
 
-    public static string Get(string key)
+    private readonly string _fileName;
+    private Dictionary<string, string> _map;
+
+    private LocaleFile(string fileName)
+    {
+        _fileName = fileName;
+    }
+
+    public string Get(string key)
     {
         if (_map == null)
         {
             _map = Load();
         }
-        if (key != null && _map.TryGetValue(key, out string value))
+        if (key != null && _map.TryGetValue(key, out string value) && !string.IsNullOrWhiteSpace(value))
         {
             return value;
         }
         return null;
     }
 
-    private static Dictionary<string, string> Load()
+    private Dictionary<string, string> Load()
     {
         var map = new Dictionary<string, string>(StringComparer.Ordinal);
-        string path = Path.Combine(AppContext.BaseDirectory, "Content", "localization", "locale_en");
+        string path = Path.Combine(AppContext.BaseDirectory, "Content", "localization", _fileName);
         try
         {
             using var reader = new BinaryReader(File.OpenRead(path), Encoding.UTF8);
@@ -38,7 +47,7 @@ internal static class EnglishLocale
                 string key = reader.ReadString();
                 map[key] = reader.ReadString();
             }
-            Log.Info($"English locale: {map.Count} strings");
+            Log.Info($"Locale {_fileName}: {map.Count} strings");
         }
         catch (Exception e)
         {

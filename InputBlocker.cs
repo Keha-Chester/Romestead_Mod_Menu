@@ -25,7 +25,7 @@ internal static class InputBlocker
     public static bool Blocking => CheatMenu.IsOpen || _suppressUntilRelease;
 
     // Chat and the dev terminal read the keyboard on their own.
-    public static bool BlocksTextInput => Blocking || Terraform.BrushActive;
+    public static bool BlocksTextInput => Blocking || Terraform.BrushActive || BuildTool.Active;
 
     public static void BeforeInputUpdate()
     {
@@ -37,6 +37,10 @@ internal static class InputBlocker
             if (Terraform.BrushActive)
             {
                 Terraform.StopBrush(reopenMenu: true);
+            }
+            else if (BuildTool.Active)
+            {
+                BuildTool.Stop(reopenMenu: true);
             }
             else if (CheatMenu.IsOpen)
             {
@@ -56,6 +60,7 @@ internal static class InputBlocker
         }
 
         Terraform.BeforeInput(keyboard);
+        BuildTool.BeforeInput(keyboard);
 
         if (!CheatMenu.IsOpen && _suppressUntilRelease && keyboard.GetPressedKeyCount() == 0 && !AnyMouseButtonDown())
         {
@@ -75,7 +80,7 @@ internal static class InputBlocker
             KeepScrollWheel();
             return;
         }
-        if (Terraform.BrushActive)
+        if (Terraform.BrushActive || BuildTool.Active)
         {
             // Digital actions (attack, interact, hotbar, menus) are consumed; walking keeps working.
             InputManager.ConsumeAll();

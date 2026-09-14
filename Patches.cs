@@ -135,6 +135,14 @@ internal static class Patches
         }
         try
         {
+            BuildTool.DrawOverlay();
+        }
+        catch (Exception e)
+        {
+            Log.ErrorOnce("Build tool overlay", e);
+        }
+        try
+        {
             CheatMenu.Draw();
         }
         catch (Exception e)
@@ -152,6 +160,14 @@ internal static class Patches
         catch (Exception e)
         {
             Log.ErrorOnce("Terraform update", e);
+        }
+        try
+        {
+            BuildTool.ClientUpdate();
+        }
+        catch (Exception e)
+        {
+            Log.ErrorOnce("Build tool update", e);
         }
         try
         {

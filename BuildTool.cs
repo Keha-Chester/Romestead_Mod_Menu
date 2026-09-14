@@ -22,6 +22,7 @@ using Shared.Data.Furniture;
 using Shared.Entity;
 using Shared.Entity.Components;
 using Shared.Models;
+using Shared.Models.Buildings;
 using Shared.Models.Construction;
 using Shared.Models.Player;
 using S = Shared.Models.WorldTile.StructureType;
@@ -87,6 +88,7 @@ internal static class BuildTool
         public Rectangle Bounds;
         public string ConstructionId;
         public string UpgradeId;
+        public string Biome;
         // Why a click would do nothing; shown instead of applying.
         public string Problem;
 
@@ -326,7 +328,7 @@ internal static class BuildTool
             BuildingInstanceModel model = building.Model;
             if (model != null && model.TileBounds.Contains(tile))
             {
-                return Check(new Target { Kind = TargetKind.Building, Id = model.Id, Bounds = model.TileBounds, ConstructionId = model.ConstructionId }, action);
+                return Check(new Target { Kind = TargetKind.Building, Id = model.Id, Bounds = model.TileBounds, ConstructionId = model.ConstructionId, Biome = model.BiomeCategory }, action);
             }
         }
         foreach (Decoration decoration in GameState.Decorations.Values)
@@ -348,12 +350,15 @@ internal static class BuildTool
     {
         if (action == BuildAction.Upgrade)
         {
-            ConstructionModel next = NextUpgrade(target.ConstructionId);
+            ConstructionModel next = NextUpgrade(target.ConstructionId, target.Biome, out bool unfinished);
             target.UpgradeId = next?.Id;
+            string name = ConstructionName(target.ConstructionId);
             if (next == null)
             {
-                target.Problem = Loc.T($"{ConstructionName(target.ConstructionId)} has no further upgrades.",
-                    $"У «{ConstructionName(target.ConstructionId)}» больше нет улучшений.");
+                target.Problem = unfinished
+                    ? Loc.T($"The next level of {name} is not finished in this game version: its map is missing.",
+                        $"Следующий уровень «{name}» в этой версии игры не доделан: нет его карты.")
+                    : Loc.T($"{name} has no further upgrades.", $"У «{name}» больше нет улучшений.");
             }
         }
         else if (action == BuildAction.Demolish && target.Kind == TargetKind.Building
@@ -365,8 +370,10 @@ internal static class BuildTool
     }
 
     // The upgrades the game offers for this construction; an already unlocked one first.
-    private static ConstructionModel NextUpgrade(string constructionId)
+    // Building levels whose maps are not shipped yet are skipped: they break the world (see SaveRepair).
+    private static ConstructionModel NextUpgrade(string constructionId, string biome, out bool unfinished)
     {
+        unfinished = false;
         ConstructionModel current = ConstructionDataBase.GetConstructionOrNull(constructionId);
         if (current?.SpawnedId == null)
         {
@@ -378,8 +385,12 @@ internal static class BuildTool
             ConstructionType.Decoration => ConstructionDataBase.GetUpgradesForDecoration(current.SpawnedId),
             _ => null
         };
-        return upgrades?
-            .Where(upgrade => upgrade.Type == current.Type)
+        List<ConstructionModel> candidates = upgrades?.Where(upgrade => upgrade.Type == current.Type).ToList() ?? new List<ConstructionModel>();
+        List<ConstructionModel> playable = candidates
+            .Where(upgrade => upgrade.Type != ConstructionType.Building || SaveRepair.HasMaps(BuildingDataBase.GetBuildingOrNull(upgrade.SpawnedId), biome))
+            .ToList();
+        unfinished = candidates.Count > 0 && playable.Count == 0;
+        return playable
             .OrderBy(upgrade => GameState.ConstructionRecipes.Contains(upgrade.Id) ? 0 : 1)
             .ThenBy(upgrade => upgrade.UpgradeLevel)
             .FirstOrDefault();
@@ -476,6 +487,14 @@ internal static class BuildTool
                 bool upgraded;
                 if (building)
                 {
+                    // Checked again right before upgrading: a level without its maps would crash the server.
+                    string biome = ServerGameState.Buildings.TryGetValue(id, out BuildingSimulationModel current) ? current.InstanceModel.BiomeCategory : null;
+                    if (!SaveRepair.HasMaps(BuildingDataBase.GetBuildingOrNull(ConstructionDataBase.GetConstructionOrNull(upgradeId)?.SpawnedId), biome))
+                    {
+                        Log.Warn($"Build tool: upgrade {name} -> {upgradeId} skipped, its maps are missing");
+                        Notes.Enqueue(Loc.T($"The next level of {name} is not finished in this game version.", $"Следующий уровень «{name}» в этой версии игры не доделан."));
+                        return;
+                    }
                     BuildingsServerManager.TryUpgradeBuilding(id, upgradeId, consumeMaterials: false);
                     upgraded = ServerGameState.Buildings.TryGetValue(id, out BuildingSimulationModel model) && model.InstanceModel.ConstructionId == upgradeId;
                 }

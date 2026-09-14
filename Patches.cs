@@ -6,6 +6,7 @@ using Candide.Input;
 using Candide.Terminal;
 using Candide.Toolkit;
 using CandideServer.Entities.Controllers;
+using CandideServer.ServerControllers;
 using CandideServer.ServerManagers;
 using CandideServer.ServerSystems;
 using HarmonyLib;
@@ -47,6 +48,21 @@ internal static class Patches
             typeof(ConstructionModel), typeof(Rectangle), typeof(Guid), typeof(Guid), typeof(Dictionary<string, string>), typeof(Guid?), typeof(Guid?), typeof(Guid?)
         }), nameof(SpawnConstructionPrefix));
         Patch(harmony, () => AccessTools.Method(typeof(ServerCart2Controller), "PickupEntity"), nameof(CartPickupPrefix));
+
+        // Worlds with a building upgraded to a level whose map is not shipped load again (see SaveRepair).
+        Patch(harmony, () => AccessTools.Method(typeof(BuildingsSController), nameof(BuildingsSController.BeforeWorldGameStateLoaded)), nameof(BeforeBuildingsLoadedPrefix));
+    }
+
+    private static void BeforeBuildingsLoadedPrefix()
+    {
+        try
+        {
+            SaveRepair.RepairBuildings();
+        }
+        catch (Exception e)
+        {
+            Log.Error("Save repair failed", e);
+        }
     }
 
     private static void Patch(Harmony harmony, Func<MethodBase> target, string prefix = null, string postfix = null, string finalizer = null)

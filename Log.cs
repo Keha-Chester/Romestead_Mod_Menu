@@ -16,6 +16,11 @@ internal static class Log
         _path = Path.Combine(dir, "RomesteadCheatMenu.log");
         try
         {
+            // Keep the previous session too: problems are usually reported after the game was restarted.
+            if (File.Exists(_path))
+            {
+                File.Copy(_path, Path.Combine(dir, "RomesteadCheatMenu.previous.log"), overwrite: true);
+            }
             File.WriteAllText(_path, string.Empty, new UTF8Encoding(false));
         }
         catch

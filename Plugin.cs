@@ -5,7 +5,7 @@ namespace RomesteadCheatMenu;
 
 public static class Plugin
 {
-    public const string Version = "1.0.1";
+    public const string Version = "1.0.2";
 
     public static string ModDir { get; private set; }
 
